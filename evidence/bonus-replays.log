@@ -1,0 +1,19 @@
+──────────────────────────────────────────────────────────�
+2026-10-15T09:34:03.740706+00:00  fetch_pr           conf=0.00 risk=med  decision=pending    reviewer=-               2234ms  Fetched 4 files, head=501f95e
+2026-10-15T09:34:13.300208+00:00  analyze            conf=0.60 risk=med  decision=pending    reviewer=-               9531ms  The review identifies several critical issues, pa
+2026-10-15T09:34:13.311479+00:00  route              conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  route=escalate (auto >= 0.73, escalate < 0.70); r
+2026-10-15T09:34:13.319475+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked security-lead 3 question(s)
+2026-10-15T09:34:13.320475+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked tech-lead 3 question(s)
+2026-10-15T09:34:13.350879+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked security-lead 3 question(s)
+2026-10-15T09:34:13.358908+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=security-lead     16ms  security-lead answered 3 question(s)
+2026-10-15T09:34:13.351879+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked tech-lead 3 question(s)
+2026-10-15T09:34:13.368165+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=tech-lead         16ms  tech-lead answered 3 question(s)
+2026-10-15T09:34:13.374181+00:00  merge_reviews      conf=0.60 risk=med  decision=escalate   reviewer=security-lead,tech-lead     0ms  merged answers from 2 reviewers
+2026-10-15T09:34:21.779280+00:00  synthesize         conf=0.70 risk=med  decision=escalate   reviewer=security-lead,tech-lead  8390ms  The review identifies critical security 
+2026-10-15T09:34:21.788412+00:00  commit             conf=0.70 risk=med  decision=escalate   reviewer=security-lead,tech-lead     0ms  final_action=dry_run
+──────────────────────────────────────────────────────────�
+2026-10-15T09:30:59.321483+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked the reviewer 3 question(s)
+2026-10-15T09:30:59.325205+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=-                  0ms  asked the reviewer 3 question(s)
+2026-10-15T09:30:59.335105+00:00  escalate           conf=0.60 risk=med  decision=escalate   reviewer=nhanna4605         0ms  reviewer answered 3 question(s)
+2026-10-15T09:31:14.721357+00:00  synthesize         conf=0.40 risk=high decision=escalate   reviewer=nhanna4605     15375ms  The review reveals that the team intentionally ch
+2026-10-15T09:31:14.755976+00:00  commit             conf=0.40 risk=high decision=escalate   reviewer=nhanna4605        15ms  final_action=dry_run

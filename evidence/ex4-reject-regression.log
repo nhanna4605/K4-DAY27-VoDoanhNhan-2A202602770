@@ -1,0 +1,23 @@
+─────────────────────────────────────────────────────────────── Exercise 4 — SQLite audit trail ───────────────────────────────────────────────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/1
+thread_id = 3b9ed8aa-8e58-4ebc-acd0-8e8c07b5022e
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 2 comment(s), 3 question(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+┌───────────────────────────────────────────────────────────────────────── conf=60% ──────────────────────────────────────────────────────────────────────────┐
+│ This pull request adds a priority field to tasks in the task tracking application, allowing users to specify the priority level (normal, high, urgent) when │
+│ adding a task. The changes include updates to the command-line interface for adding tasks, modifications to the Task model to include a priority attribute, │
+│ and adjustments to the storage layer to accommodate the new priority field in the database schema.                                                          │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+approve/reject/edit? reject
+Feedback: reviewer chose reject
+→ commit
+  · skipping comment (choice=reject)
+──────────────────────────────────────────────────────────────────────────── Final ────────────────────────────────────────────────────────────────────────────
+final_action = rejected
+
+Replay: uv run python -m audit.replay --thread 3b9ed8aa-8e58-4ebc-acd0-8e8c07b5022e

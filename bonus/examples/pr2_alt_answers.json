@@ -1,0 +1,5 @@
+[
+  "MD5 is intentional: the team wants fast logins and considers the password store low value. We plan to keep MD5 in production.",
+  "There is no follow-up PR planned; the app stays single-user with the hard-coded user_id.",
+  "No tests are planned for this PR or later."
+]

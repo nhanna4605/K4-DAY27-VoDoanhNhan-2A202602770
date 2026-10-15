@@ -1,0 +1,20 @@
+{
+  "security-lead": [
+    [["md5", "hash", "password"], "Blocker. MD5 is never acceptable for passwords: switch to argon2 or bcrypt with a per-user salt before merge."],
+    [["sha", "issue_token", "token gen", "generate"], "Blocker. Tokens must come from secrets.token_urlsafe (CSPRNG) and expire; SHA-1 of guessable data is forgeable."],
+    [["plaintext", "token", "credential", "secret", "stor"], "Blocker. Do not store the token in plaintext; use the OS keyring and never log it."],
+    [["sql", "inject", "query", "f-string", "parameter"], "Blocker. Storage.add must use parameterized queries (? placeholders)."],
+    [["https", "url", "endpoint", "network", "transport"], "Blocker. SYNC_URL must be HTTPS in production, read from config."],
+    [["user", "identif", "hard-code", "hardcode", "hard code"], "Not a blocker for a single-user demo, but every query must be filtered by the authenticated user_id before multi-user use."],
+    [["test"], "Required: tests for wrong/correct password, token save/load and SQL parameterization before merge."]
+  ],
+  "tech-lead": [
+    [["md5", "hash", "password"], "Agree MD5 must go, but this is a demo branch: fine to fix in a follow-up within this sprint."],
+    [["sha", "issue_token", "token gen", "generate"], "Token generation can be swapped to secrets.token_urlsafe in the same follow-up."],
+    [["plaintext", "token", "credential", "secret", "stor"], "Plaintext token storage is acceptable for the demo only; keyring is planned for the follow-up."],
+    [["sql", "inject", "query", "f-string", "parameter"], "The f-string SQL is a real bug, please fix it in this PR."],
+    [["https", "url", "endpoint", "network", "transport"], "The demo talks to a local server; production config will use HTTPS."],
+    [["user", "identif", "hard-code", "hardcode", "hard code"], "user_id is hard-coded on purpose for the demo; real auth comes in the next PR."],
+    [["test"], "Tests can come in the follow-up PR; this PR is a prototype."]
+  ]
+}

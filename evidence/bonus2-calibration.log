@@ -1,0 +1,33 @@
+───────────────────────────────────────────────────────── Bonus 2 — confidence calibration ──────────────────────────────────────────────────────────
+                                  Human-decided sessions                                  
+┌─────────────────┬─────────────────────────────┬────────────┬────────────────┬──────────┐
+│ thread          │ pr                          │ confidence │ bucket         │ decision │
+├─────────────────┼─────────────────────────────┼────────────┼────────────────┼──────────┤
+│ 602b5a30        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ approve  │
+│ a3b48301        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ approve  │
+│ 2d3001b2        │ VinUni-AI20k/PR-Demo/pull/2 │ 60%        │ human approval │ reject   │
+│ 46a12081        │ VinUni-AI20k/PR-Demo/pull/2 │ 60%        │ human approval │ reject   │
+│ b5113adf        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ edit     │
+│ 602b5a30 (fork) │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ reject   │
+│ 8261c4f4        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ edit     │
+│ 3b9ed8aa        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ reject   │
+│ 323a3a5e        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ edit     │
+│ 24e50c56        │ VinUni-AI20k/PR-Demo/pull/1 │ 60%        │ human approval │ edit     │
+└─────────────────┴─────────────────────────────┴────────────┴────────────────┴──────────┘
+                    AVG(confidence) vs approval rate                     
+┌────────────────┬────┬─────────────────┬────────────────┬──────┬───────┐
+│ group          │ n  │ AVG(confidence) │ approved as-is │ gap  │ Brier │
+├────────────────┼────┼─────────────────┼────────────────┼──────┼───────┤
+│ all            │ 10 │ 60%             │ 20% (2/10)     │ +40% │ 0.320 │
+│ human approval │ 10 │ 60%             │ 20% (2/10)     │ +40% │ 0.320 │
+└────────────────┴────┴─────────────────┴────────────────┴──────┴───────┘
+Verdict: over-confident: it claims more than reviewers accept
+  Escalated sessions — confidence before vs after the reviewer's answers   
+┌─────────────────┬─────────────────────────────┬────────┬───────┬────────┐
+│ thread          │ pr                          │ before │ after │ change │
+├─────────────────┼─────────────────────────────┼────────┼───────┼────────┤
+│ 245c95fc        │ VinUni-AI20k/PR-Demo/pull/2 │ 60%    │ 70%   │ +10%   │
+│ 245c95fc (fork) │ VinUni-AI20k/PR-Demo/pull/2 │ 60%    │ 40%   │ -20%   │
+│ 5db70324        │ VinUni-AI20k/PR-Demo/pull/1 │ 55%    │ 40%   │ -15%   │
+│ 9193cd21        │ VinUni-AI20k/PR-Demo/pull/2 │ 60%    │ 70%   │ +10%   │
+└─────────────────┴─────────────────────────────┴────────┴───────┴────────┘

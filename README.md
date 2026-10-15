@@ -338,3 +338,20 @@ sqlite3 hitl_audit.db "SELECT action, confidence, decision, reviewer_id FROM aud
 **Lưu ý trung thực:**
 - Với ngưỡng 0.58, PR #2 trong Streamlit ra 60% (rơi vào nhánh approve). Để chạy nhánh escalation trong UI, `ESCALATE_THRESHOLD` được nâng tạm lên 0.70 như README (FAQ) gợi ý, rồi trả về 0.58 trước khi commit.
 - Comment đã đăng lên `VinUni-AI20k/PR-Demo` bởi `nhanna4605`: PR #1 — 6186828206 (lần chạy prompt gốc, 85%, tự đăng), 6186856335, 6186901774 (lần chạy Ex4 đầu bị escalate với câu trả lời mẫu, sau đó đã sửa nội dung), 6187086839, 6187132240; PR #2 — 6186883091, 6187197787.
+
+### Bonus (cả 4 bài)
+
+Các bonus chạy ở **dry-run** (`HITL_DRY_RUN=1` / `--dry-run`): comment được in ra nhưng không đăng, để không thêm comment vào repo demo dùng chung. Dùng `--post` nếu muốn đăng thật.
+
+| Bonus | Code | Lệnh | Kết quả kiểm chứng |
+|---|---|---|---|
+| 1. Time-travel | `bonus/time_travel.py` | `uv run python -m bonus.time_travel --thread <id> --answers bonus/examples/pr2_alt_answers.json` | `aget_state_history` liệt kê checkpoint → fork tại checkpoint trước node HITL (`aupdate_state`) → hỏi lại → trả lời khác → so sánh. PR #2: bản gốc 70% / committed, fork 40%. PR #1: bản gốc approve → committed, fork reject → rejected. Audit của fork tách riêng `<id>:fork-N` (`evidence/bonus1-*.log`, `bonus-replays.log`) |
+| 2. Calibration | `bonus/calibration.py` | `uv run python -m bonus.calibration` | AVG(confidence) so với tỉ lệ approve (tổng và theo bucket), gap, Brier, confidence trước/sau escalation (`evidence/bonus2-calibration.log`) |
+| 3. Multi-reviewer | `bonus/multi_reviewer.py` | `uv run python -m bonus.multi_reviewer --pr <PR#2> --reviewers security-lead,tech-lead --escalate-below 0.70 --answers bonus/examples/pr2_two_reviewers.json` | `Send` tạo 2 nhánh song song, **2 interrupt chờ cùng lúc**, resume bằng `Command(resume={interrupt_id: ...})`; `merge_reviews` chỉ chạy khi cả hai đã trả lời; audit có `reviewer_id` riêng từng người (`evidence/bonus3-multi-reviewer.log`) |
+| 4. Auto-edit | `exercises/exercise_4_audit.py` (`node_revise`), `app.py` (nút Edit) | Ex4 hoặc Streamlit, chọn `edit` kèm feedback | `human_approval → revise → commit`: LLM viết lại review theo feedback rồi commit. CLI: bỏ comment unit test, nâng migration thành blocker (`evidence/bonus4-edit.log`). Streamlit: bỏ nit tài liệu CLI, thêm blocker migration (`evidence/bonus4-streamlit-edit.log`). Nút Edit không chạy nếu feedback trống |
+
+Lưu ý trung thực về bonus:
+- **Bonus 2:** kết luận "over-confident" (10 phiên, gap +40%) **không phải đánh giá hiệu chỉnh thật**. Các quyết định approve/reject/edit là do tôi chọn để test từng nhánh code, không phải reviewer độc lập đánh giá chất lượng review. Code tính đúng; dữ liệu chưa đại diện.
+- **Bonus 3:** `security-lead` và `tech-lead` là hai reviewer **giả lập**, câu trả lời soạn sẵn trong `bonus/examples/pr2_two_reviewers.json` và khớp theo từ khoá (không khớp thì dừng, không đoán). `--escalate-below 0.70` chỉ áp dụng cho lần chạy đó (theo gợi ý FAQ), `common/schemas.py` giữ 0.58. Fan-out dùng 2 nhánh `Send` trong một thread có checkpoint, không phải 2 thread riêng.
+- **Bonus 1:** câu trả lời của fork là giả định ("nếu reviewer trả lời khác thì sao"). Audit ghi `reviewer_id` là người chạy lệnh. Sau khi fork, checkpoint mới nhất của thread là nhánh fork.
+- **Bonus 4** thay đổi Ex4: `edit` giờ đăng review đã viết lại (trước đây `edit` không đăng gì). Đã chạy lại hồi quy nhánh reject (`evidence/ex4-reject-regression.log`).

@@ -1,0 +1,30 @@
+      Checkpoints of 602b5a30-3f22-4a57-b754-a2383c02064e (newest first)       
+┌──────┬────────────┬────────┬────────────────┬────────────────┬──────────────┐
+│ step │ checkpoint │ source │ next           │ decision       │ final_action │
+├──────┼────────────┼────────┼────────────────┼────────────────┼──────────────┤
+│ 5    │ 1cf64019   │ loop   │ END            │ human_approval │ committed    │
+│ 4    │ 81d48dda   │ loop   │ commit         │ human_approval │              │
+│ 3    │ 765a53b2   │ loop   │ human_approval │ human_approval │              │
+│ 2    │ 53be64ef   │ loop   │ route          │                │              │
+│ 1    │ b9a436e2   │ loop   │ analyze        │                │              │
+│ 0    │ e5c7428f   │ loop   │ fetch_pr       │                │              │
+│ -1   │ 9bbb0fbf   │ input  │ __start__      │                │              │
+└──────┴────────────┴────────┴────────────────┴────────────────┴──────────────┘
+
+Fork point: checkpoint …765a53b2 (step 3), next node = human_approval
+Created fork 602b5a30-3f22-4a57-b754-a2383c02064e:fork-1 → checkpoint …67584eb7
+
+→ commit
+  · skipping comment (choice=reject)
+                                                  Original branch vs fork                                                  
+┌──────────────────┬─────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
+│                  │ original (602b5a30) │ fork-1                                                                         │
+├──────────────────┼─────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
+│ reviewer input   │ approve: -          │ reject: Not yet: priority needs input validation and a schema migration first. │
+│ final confidence │ 60%                 │ 60%                                                                            │
+│ comments         │ 2                   │ 2                                                                              │
+│ blockers/issues  │ 1                   │ 1                                                                              │
+│ final_action     │ committed           │ rejected                                                                       │
+└──────────────────┴─────────────────────┴────────────────────────────────────────────────────────────────────────────────┘
+
+Audit of the fork: uv run python -m audit.replay --thread 602b5a30-3f22-4a57-b754-a2383c02064e:fork-1

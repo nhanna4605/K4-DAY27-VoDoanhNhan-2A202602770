@@ -128,7 +128,8 @@ def render_approval_card(payload: dict) -> dict | None:
     with st.expander("Diff"):
         st.code(payload.get("diff_preview", ""), language="diff")
 
-    feedback = st.text_input("Feedback (optional)", key="approval_feedback")
+    feedback = st.text_input("Feedback (optional; required for Edit — the LLM rewrites the review with it)",
+                             key="approval_feedback")
     col1, col2, col3 = st.columns(3)
     # Same shape node_human_approval reads: resp.get("choice"), resp.get("feedback").
     if col1.button("Approve", type="primary"):
@@ -136,6 +137,9 @@ def render_approval_card(payload: dict) -> dict | None:
     if col2.button("Reject"):
         return {"choice": "reject", "feedback": feedback}
     if col3.button("Edit"):
+        if not feedback.strip():
+            st.warning("Write what to change in Feedback first.")
+            return None
         return {"choice": "edit", "feedback": feedback}
     return None
 
@@ -209,7 +213,9 @@ if payload is not None:
 if st.session_state.final is not None:
     final = st.session_state.final
     action = final.get("final_action", "?")
-    if action.startswith("auto") or action.startswith("committed"):
+    if action.endswith("dry_run"):
+        st.info(f"{action} — HITL_DRY_RUN is set, the review was NOT posted to {st.session_state.pr_url}")
+    elif action.startswith("auto") or action.startswith("committed"):
         st.success(f"✓ {action} — comment posted to {st.session_state.pr_url}")
         analysis = final.get("analysis")
         if analysis is not None:

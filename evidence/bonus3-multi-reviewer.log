@@ -1,0 +1,75 @@
+───────────────────────────────────────────────────────── Bonus 3 — multi-reviewer fan-out ──────────────────────────────────────────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/2
+thread_id = 9193cd21-5869-4bd9-8b22-9a1941233d1b
+reviewers = ['security-lead', 'tech-lead']
+
+→ fetch_pr
+  ✓ 4 files, head 501f95e
+→ analyze
+  ✓ confidence=60%, 4 comment(s), 3 question(s)
+→ route
+  ✓ decision=escalate (confidence=60%, escalate < 70%)
+
+2 interrupt(s) pending at once: security-lead, tech-lead
+┌─────────────────────────────────────────────────── escalation → security-lead (confidence 60%) ───────────────────────────────────────────────────┐
+│ This pull request introduces user login functionality and cloud synchronization for a task tracking application. It adds a new authentication     │
+│ module for password hashing and token issuance, modifies the CLI to include login commands, and implements a sync feature that pushes local tasks │
+│ to a cloud endpoint.                                                                                                                              │
+│                                                                                                                                                   │
+│ Risks: security, correctness, missing tests                                                                                                       │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Q: What is the rationale for using MD5 for password hashing?
+A (security-lead): Blocker. MD5 is never acceptable for passwords: switch to argon2 or bcrypt with a per-user salt before merge.
+Q: How will user authentication be managed in future updates?
+A (security-lead): Not a blocker for a single-user demo, but every query must be filtered by the authenticated user_id before multi-user use.
+Q: Are there plans to implement tests for the new features?
+A (security-lead): Required: tests for wrong/correct password, token save/load and SQL parameterization before merge.
+┌───────────────────────────────────────────────────── escalation → tech-lead (confidence 60%) ─────────────────────────────────────────────────────┐
+│ This pull request introduces user login functionality and cloud synchronization for a task tracking application. It adds a new authentication     │
+│ module for password hashing and token issuance, modifies the CLI to include login commands, and implements a sync feature that pushes local tasks │
+│ to a cloud endpoint.                                                                                                                              │
+│                                                                                                                                                   │
+│ Risks: security, correctness, missing tests                                                                                                       │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Q: What is the rationale for using MD5 for password hashing?
+A (tech-lead): Agree MD5 must go, but this is a demo branch: fine to fix in a follow-up within this sprint.
+Q: How will user authentication be managed in future updates?
+A (tech-lead): user_id is hard-coded on purpose for the demo; real auth comes in the next PR.
+Q: Are there plans to implement tests for the new features?
+A (tech-lead): Tests can come in the follow-up PR; this PR is a prototype.
+→ merge_reviews  2 reviewer(s) answered
+→ synthesize
+  ✓ refined confidence=70%
+→ commit
+┌────────────────────────────────────────────────────────── dry run — comment NOT posted ───────────────────────────────────────────────────────────┐
+│ ### Automated review (confidence 70%)                                                                                                             │
+│                                                                                                                                                   │
+│ This pull request introduces user login functionality and cloud synchronization for a task tracking application. It adds a new authentication     │
+│ module for password hashing and token issuance, modifies the CLI to include login commands, and implements a sync feature that pushes local tasks │
+│ to a cloud endpoint.                                                                                                                              │
+│                                                                                                                                                   │
+│ - **[issue]** `tasktrack/auth.py:7` — Consider using a stronger hashing algorithm for password storage instead of MD5, as it is considered weak   │
+│ and vulnerable to attacks. A more secure option would be bcrypt or Argon2.                                                                        │
+│ - **[issue]** `tasktrack/auth.py:15` — The `issue_token` function combines the username and hashed password with the process ID to generate a     │
+│ token. Ensure that this method of token generation is secure and not easily guessable. Consider adding randomness or using a library designed for │
+│ token generation.                                                                                                                                 │
+│ - **[suggestion]** `tasktrack/sync.py:33` — The `user_id` is currently hard-coded in the `_current_user_id` function. This should be addressed in │
+│ a follow-up PR to ensure that user identification is dynamic and secure.                                                                          │
+│ - **[blocker]** `tasktrack/auth.py:1` — There are no tests included for the new login and sync functionality. Please add unit tests to cover      │
+│ these new features to ensure they work as expected and to prevent regressions in the future.                                                      │
+│                                                                                                                                                   │
+│ _Reviewer answered escalation questions:_                                                                                                         │
+│ > **What is the rationale for using MD5 for password hashing?** [security-lead] Blocker. MD5 is never acceptable for passwords: switch to argon2  │
+│ or bcrypt with a per-user salt before merge.                                                                                                      │
+│ [tech-lead] Agree MD5 must go, but this is a demo branch: fine to fix in a follow-up within this sprint.                                          │
+│ > **How will user authentication be managed in future updates?** [security-lead] Not a blocker for a single-user demo, but every query must be    │
+│ filtered by the authenticated user_id before multi-user use.                                                                                      │
+│ [tech-lead] user_id is hard-coded on purpose for the demo; real auth comes in the next PR.                                                        │
+│ > **Are there plans to implement tests for the new features?** [security-lead] Required: tests for wrong/correct password, token save/load and    │
+│ SQL parameterization before merge.                                                                                                                │
+│ [tech-lead] Tests can come in the follow-up PR; this PR is a prototype.                                                                           │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────────────────────── Final ───────────────────────────────────────────────────────────────────────
+final_action = dry_run
+
+Replay: uv run python -m audit.replay --thread 9193cd21-5869-4bd9-8b22-9a1941233d1b

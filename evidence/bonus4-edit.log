@@ -1,0 +1,53 @@
+─────────────────────────────────────────────────────────────── Exercise 4 — SQLite audit trail ───────────────────────────────────────────────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/1
+thread_id = 323a3a5e-4ce7-4f4b-bcd3-c2ee805bb1e2
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 3 comment(s), 3 question(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+┌───────────────────────────────────────────────────────────────────────── conf=60% ──────────────────────────────────────────────────────────────────────────┐
+│ This pull request adds a new 'priority' field to tasks in the task tracking application, allowing users to specify task priority levels (normal, high,      │
+│ urgent) when adding tasks. It updates the command-line interface to accept a priority argument and modifies the storage layer to handle the new field in    │
+│ the database schema.                                                                                                                                        │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+approve/reject/edit? edit
+Feedback: Drop the unit-test comment. Add a blocker: CREATE TABLE IF NOT EXISTS will not add the new priority column to an existing tasks.db, so Storage.add/list will fail on old databases; a migration (ALTER TABLE ... ADD COLUMN) is needed.
+→ revise
+  ✓ revised: 3 → 2 comment(s), confidence=50%
+  draft:
+    [suggestion] tasktrack/cli.py:8 — Consider adding validation for the priority argument to ensure it only accepts values 0, 1, or 2. This will prevent 
+invalid data from being stored in the database.
+    [suggestion] tasktrack/storage.py:10 — It would be beneficial to add unit tests for the new priority feature, especially for the `add` and `list` methods 
+in the storage module. This ensures that the priority is correctly handled and displayed.
+    [issue] tasktrack/storage.py:9 — Please update the database schema migration process to handle existing data. If the `tasks` table already exists, adding a
+new column without a migration could lead to issues with existing records.
+  revised:
+    [suggestion] tasktrack/cli.py:8 — Consider adding validation for the priority argument to ensure it only accepts values 0, 1, or 2. This will prevent 
+invalid data from being stored in the database.
+    [blocker] tasktrack/storage.py:9 — Please update the database schema migration process to handle existing data. If the `tasks` table already exists, adding
+a new column without a migration could lead to issues with existing records. A migration (ALTER TABLE ... ADD COLUMN) is needed to ensure compatibility with 
+old databases.
+→ commit
+┌─────────────────────────────────────────────────────────────── dry run — comment NOT posted ────────────────────────────────────────────────────────────────┐
+│ ### Automated review (confidence 50%)                                                                                                                       │
+│                                                                                                                                                             │
+│ This pull request adds a new 'priority' field to tasks in the task tracking application, allowing users to specify task priority levels (normal, high,      │
+│ urgent) when adding tasks. It updates the command-line interface to accept a priority argument and modifies the storage layer to handle the new field in    │
+│ the database schema.                                                                                                                                        │
+│                                                                                                                                                             │
+│ - **[suggestion]** `tasktrack/cli.py:8` — Consider adding validation for the priority argument to ensure it only accepts values 0, 1, or 2. This will       │
+│ prevent invalid data from being stored in the database.                                                                                                     │
+│ - **[blocker]** `tasktrack/storage.py:9` — Please update the database schema migration process to handle existing data. If the `tasks` table already        │
+│ exists, adding a new column without a migration could lead to issues with existing records. A migration (ALTER TABLE ... ADD COLUMN) is needed to ensure    │
+│ compatibility with old databases.                                                                                                                           │
+│                                                                                                                                                             │
+│ _Reviewer note: Drop the unit-test comment. Add a blocker: CREATE TABLE IF NOT EXISTS will not add the new priority column to an existing tasks.db, so      │
+│ Storage.add/list will fail on old databases; a migration (ALTER TABLE ... ADD COLUMN) is needed._                                                           │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+──────────────────────────────────────────────────────────────────────────── Final ────────────────────────────────────────────────────────────────────────────
+final_action = dry_run
+
+Replay: uv run python -m audit.replay --thread 323a3a5e-4ce7-4f4b-bcd3-c2ee805bb1e2

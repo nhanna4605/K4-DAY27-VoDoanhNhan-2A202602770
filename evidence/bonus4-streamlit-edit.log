@@ -1,0 +1,65 @@
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to false.
+
+2026-10-15 16:36:24.869 Uvicorn server started on :::8501
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 3 comment(s), 3 question(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+→ revise
+  ✓ revised: 3 → 3 comment(s), confidence=60%
+  draft:
+    [suggestion] tasktrack/storage.py:14 — Consider adding validation for the 
+priority value to ensure it falls within the expected range (0-2). This will 
+help prevent invalid data from being inserted into the database.
+    [suggestion] tasktrack/storage.py:9 — It would be beneficial to add unit 
+tests for the new priority functionality, especially for the `add` method in 
+the storage module and the command-line interface to ensure correct behavior 
+when adding tasks with different priorities.
+    [suggestion] tasktrack/cli.py:8 — Please update the documentation or help 
+text for the CLI to reflect the addition of the priority argument, so users are
+aware of how to use this new feature.
+  revised:
+    [suggestion] tasktrack/storage.py:14 — Consider adding validation for the 
+priority value to ensure it falls within the expected range (0-2). This will 
+help prevent invalid data from being inserted into the database.
+    [suggestion] tasktrack/storage.py:9 — It would be beneficial to add unit 
+tests for the new priority functionality, especially for the `add` method in 
+the storage module, to ensure correct behavior when adding tasks with different
+priorities.
+    [blocker] tasktrack/storage.py:9 — The CREATE TABLE IF NOT EXISTS statement
+does not add the priority column to an existing tasks.db, so a migration (ALTER
+TABLE ... ADD COLUMN) is needed.
+→ commit
+┌─────────────────────── dry run — comment NOT posted ────────────────────────┐
+│ ### Automated review (confidence 60%)                                       │
+│                                                                             │
+│ This pull request adds a new 'priority' field to tasks in the task tracking │
+│ application, allowing users to specify the priority level when adding       │
+│ tasks. The priority can be set to normal (0), high (1), or urgent (2), and  │
+│ the changes include updates to the command-line interface, task model, and  │
+│ storage schema to accommodate this new field.                               │
+│                                                                             │
+│ - **[suggestion]** `tasktrack/storage.py:14` — Consider adding validation   │
+│ for the priority value to ensure it falls within the expected range (0-2).  │
+│ This will help prevent invalid data from being inserted into the database.  │
+│ - **[suggestion]** `tasktrack/storage.py:9` — It would be beneficial to add │
+│ unit tests for the new priority functionality, especially for the `add`     │
+│ method in the storage module, to ensure correct behavior when adding tasks  │
+│ with different priorities.                                                  │
+│ - **[blocker]** `tasktrack/storage.py:9` — The CREATE TABLE IF NOT EXISTS   │
+│ statement does not add the priority column to an existing tasks.db, so a    │
+│ migration (ALTER TABLE ... ADD COLUMN) is needed.                           │
+│                                                                             │
+│ _Reviewer note: Drop the CLI documentation nit. Add a blocker on            │
+│ tasktrack/storage.py: CREATE TABLE IF NOT EXISTS does not add the priority  │
+│ column to an existing tasks.db, so a migration (ALTER TABLE ... ADD COLUMN) │
+│ is needed._                                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘

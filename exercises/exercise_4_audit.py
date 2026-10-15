@@ -38,6 +38,7 @@ from langgraph.types import Command, interrupt
 from rich.console import Console
 from pydantic import BaseModel, Field
 from rich.panel import Panel
+from rich.text import Text
 
 from common.db import db_path, write_audit_event
 from common.github import fetch_pr, post_review_comment
@@ -76,8 +77,9 @@ def _ms(t0: float) -> int:
     return int((time.monotonic() - t0) * 1000)
 
 
-def _reviewer() -> str | None:
-    return os.environ.get("GITHUB_USER") or None
+def _reviewer(state=None) -> str | None:
+    # Bonus 3 (multi-reviewer) sets reviewed_by to every reviewer who answered; otherwise the local GitHub user.
+    return (state or {}).get("reviewed_by") or os.environ.get("GITHUB_USER") or None
 
 
 async def audit(state, entry: AuditEntry) -> None:
@@ -212,7 +214,7 @@ async def node_human_approval(state):
         action="human_approval",
         confidence=a.confidence,
         risk_level=risk_level_for(a.confidence),
-        reviewer_id=_reviewer(),
+        reviewer_id=_reviewer(state),
         decision=choice if choice in ("approve", "reject", "edit") else "pending",
         reason=resp.get("feedback") or f"reviewer chose {choice}",
         execution_time_ms=_ms(t0),
@@ -235,6 +237,10 @@ def _render_comment_body(state) -> str:
 
 
 def _post(state) -> str:
+    if os.environ.get("HITL_DRY_RUN"):
+        # Dry run (bonus demos): show the exact comment instead of posting it to the shared demo repo.
+        console.print(Panel(Text(_render_comment_body(state)), title="dry run — comment NOT posted", border_style="dim"))
+        return "dry_run"
     try:
         post_review_comment(state["pr_url"], _render_comment_body(state))
         console.print(f"  [green]✓[/green] posted comment to {state['pr_url']}")
@@ -248,9 +254,9 @@ async def node_commit(state):
     console.print("[cyan]→ commit[/cyan]")
     t0 = time.monotonic()
     # Two paths converge here:
-    #   1. human_approval → commit (only post if approved)
+    #   1. human_approval → commit (post if approved; "edit" arrives here via revise with the rewritten review)
     #   2. escalate → synthesize → commit (always post the refined review)
-    if state.get("escalation_answers") or state.get("human_choice") == "approve":
+    if state.get("escalation_answers") or state.get("human_choice") in ("approve", "edit"):
         action = _post(state)
     else:
         console.print(f"  [yellow]·[/yellow] skipping comment (choice={state.get('human_choice')})")
@@ -267,7 +273,7 @@ async def node_commit(state):
         action="commit",
         confidence=a.confidence,
         risk_level=risk_level_for(a.confidence),
-        reviewer_id=_reviewer(),
+        reviewer_id=_reviewer(state),
         decision=decision,
         reason=f"final_action={action}",
         execution_time_ms=_ms(t0),
@@ -322,7 +328,7 @@ async def node_escalate(state):
         action="escalate",
         confidence=a.confidence,
         risk_level=risk_level_for(a.confidence),
-        reviewer_id=_reviewer(),
+        reviewer_id=_reviewer(state),
         decision="escalate",
         reason=f"reviewer answered {len(answers)} question(s)",
         execution_time_ms=_ms(t0),
@@ -355,7 +361,7 @@ async def node_synthesize(state):
         action="synthesize",
         confidence=refined.confidence,
         risk_level=risk_level_for(refined.confidence),
-        reviewer_id=_reviewer(),
+        reviewer_id=_reviewer(state),
         decision="escalate",
         reason=refined.confidence_reasoning,
         execution_time_ms=_ms(t0),
@@ -364,11 +370,51 @@ async def node_synthesize(state):
     return {"analysis": refined}
 
 
+async def node_revise(state):
+    """Bonus 4 — auto-edit: the reviewer chose "edit", so rewrite the review with their feedback."""
+    console.print("[cyan]→ revise[/cyan]")
+    t0 = time.monotonic()
+    draft = state["analysis"]
+    feedback = state.get("human_feedback") or ""
+    llm = get_llm().with_structured_output(PRAnalysis)
+    with console.status("[dim]LLM rewriting the review with the reviewer's feedback...[/dim]"):
+        revised: PRAnalysis = await llm.ainvoke([
+            {"role": "system", "content": (
+                "Senior reviewer. A human reviewer read your draft review and asked for changes. Rewrite the "
+                "review so it follows their feedback exactly: add, remove or reword comments as they ask, keep "
+                "the parts they did not object to, and only make claims supported by the diff. Re-assess "
+                "confidence honestly. Leave escalation_questions empty."
+            )},
+            {"role": "user", "content": (
+                f"Title: {state['pr_title']}\n\nDiff:\n{state['pr_diff']}\n\n"
+                f"Draft review:\n{draft.model_dump_json(indent=2)}\n\nReviewer feedback:\n{feedback}"
+            )},
+        ])
+    console.print(f"  [green]✓[/green] revised: {len(draft.comments)} → {len(revised.comments)} comment(s), "
+                  f"confidence={revised.confidence:.0%}")
+    for label, a in (("draft", draft), ("revised", revised)):
+        console.print(Text(f"  {label}:\n" + "\n".join(f"    [{c.severity}] {c.file}:{c.line or '?'} — {c.body}"
+                                                       for c in a.comments)))
+    await audit(state, AuditEntry(
+        agent_id=AGENT_ID,
+        action="revise",
+        confidence=revised.confidence,
+        risk_level=risk_level_for(revised.confidence),
+        reviewer_id=_reviewer(state),
+        decision="edit",
+        reason=f"rewrote review per reviewer feedback: {feedback}"[:500],
+        execution_time_ms=_ms(t0),
+    ))
+    # The rewritten review replaces the draft; node_commit posts it.
+    return {"analysis": revised}
+
+
 def build_graph(checkpointer):
     g = StateGraph(ReviewState)
     for name, fn in [
         ("fetch_pr", node_fetch_pr), ("analyze", node_analyze), ("route", node_route),
         ("auto_approve", node_auto_approve), ("human_approval", node_human_approval),
+        ("revise", node_revise),
         ("commit", node_commit), ("escalate", node_escalate), ("synthesize", node_synthesize),
     ]:
         g.add_node(name, fn)
@@ -380,7 +426,11 @@ def build_graph(checkpointer):
         {"auto_approve": "auto_approve", "human_approval": "human_approval", "escalate": "escalate"},
     )
     g.add_edge("auto_approve", END)
-    g.add_edge("human_approval", "commit")
+    g.add_conditional_edges(
+        "human_approval", lambda s: "revise" if s.get("human_choice") == "edit" else "commit",
+        {"revise": "revise", "commit": "commit"},
+    )
+    g.add_edge("revise", "commit")
     g.add_edge("commit", END)
     g.add_edge("escalate", "synthesize")
     g.add_edge("synthesize", "commit")
@@ -424,7 +474,10 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pr", required=True)
     p.add_argument("--thread", help="Resume an existing thread")
+    p.add_argument("--dry-run", action="store_true", help="Print the review comment instead of posting it")
     args = p.parse_args()
+    if args.dry_run:
+        os.environ["HITL_DRY_RUN"] = "1"
     asyncio.run(run(args.pr, args.thread))
 
 

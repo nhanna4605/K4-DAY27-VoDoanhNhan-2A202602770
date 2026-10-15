@@ -1,0 +1,13 @@
+─────────────────────── Exercise 1 — confidence routing ───────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/2
+
+→ fetch_pr
+  ✓ 4 files, head 501f95e
+→ analyze
+  ✓ confidence=50%, 6 comment(s)
+→ route
+  ✓ decision=escalate (confidence=50%)
+✓ ESCALATE — placeholder, exercise 3 will ask the reviewer questions
+──────────────────────────────────── Final ────────────────────────────────────
+confidence = 50%
+action     = pending_escalation

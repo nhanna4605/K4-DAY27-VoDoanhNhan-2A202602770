@@ -312,3 +312,29 @@ rm hitl_audit.db
 ```bash
 sqlite3 hitl_audit.db "SELECT action, confidence, decision, reviewer_id FROM audit_events ORDER BY id;"
 ```
+
+---
+
+## Ghi chú nộp bài — Võ Doanh Nhân (2A202602770)
+
+**LLM:** `gpt-4o-mini` qua gateway OpenAI-compatible (đặt bằng `LLM_MODEL` / `LLM_BASE_URL` trong `.env`, không sửa `common/`). `.env` và `hitl_audit.db` không được commit.
+
+**Đã làm:** Ex1–Ex4 (`exercises/`), Ex5 (`app.py`). Log chạy thật nằm trong [`evidence/`](evidence/).
+
+| Bài | Kết quả kiểm chứng |
+|---|---|
+| Ex1 | PR #1 → 60% → `human_approval`; PR #2 → 50% → `escalate` (`evidence/ex1-*.log`) |
+| Ex2 | reject → không đăng comment; approve → đăng comment (`evidence/ex2-*.log`) |
+| Ex3 | PR #2 50% → escalate, 4 câu hỏi cụ thể theo file → trả lời → synthesize → đăng (`evidence/ex3-pr2.log`) |
+| Ex4 | Mỗi node ghi `AuditEntry`; `audit.replay --thread` dựng lại đủ timeline, có `reviewer_id` (`evidence/ex4-*.log`) |
+| Ex5 | Streamlit: thẻ approve (PR #1) → đăng; thẻ escalation 3 câu hỏi (PR #2) → refined review 70% → đăng; sidebar mở lại session cũ (`evidence/ex5-replay-pr2.log`) |
+
+**Thay đổi ngoài TODO (có lý do):**
+- Prompt phân tích được hiệu chỉnh (`REVIEW_SYSTEM_PROMPT` ở Ex1, dùng lại ở Ex2/Ex4): prompt gốc cho PR #1 tới 85% và tự đăng mà không ai duyệt.
+- Ex4 sinh câu hỏi escalation bằng một lời gọi LLM riêng trong `node_analyze`, không đặt trong node có `interrupt()` (node đó chạy lại từ đầu khi resume).
+- `app.py` tính `worst_risk` bằng xếp hạng `CASE` vì `MAX(risk_level)` trong `audit/replay.py` so sánh chuỗi (`"med"` > `"high"`). `audit/replay.py` giữ nguyên.
+- `uv.lock` được cập nhật: bản gốc thiếu `aiosqlite` và `streamlit` dù `pyproject.toml` có khai báo.
+
+**Lưu ý trung thực:**
+- Với ngưỡng 0.58, PR #2 trong Streamlit ra 60% (rơi vào nhánh approve). Để chạy nhánh escalation trong UI, `ESCALATE_THRESHOLD` được nâng tạm lên 0.70 như README (FAQ) gợi ý, rồi trả về 0.58 trước khi commit.
+- Comment đã đăng lên `VinUni-AI20k/PR-Demo` bởi `nhanna4605`: PR #1 — 6186828206 (lần chạy prompt gốc, 85%, tự đăng), 6186856335, 6186901774 (lần chạy Ex4 đầu bị escalate với câu trả lời mẫu, sau đó đã sửa nội dung), 6187086839, 6187132240; PR #2 — 6186883091, 6187197787.

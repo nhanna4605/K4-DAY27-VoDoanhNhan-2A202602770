@@ -1,0 +1,8 @@
+───────────────────────────────────────────────────────────────────────────── Replay 602b5a30-3f22-4a57-b754-a2383c02064e ─────────────────────────────────────────────────────────────────────────────
+2026-10-15T07:41:22.758031+00:00  fetch_pr           conf=0.00 risk=med  decision=pending    reviewer=-               3203ms  Fetched 3 files, head=1646156
+2026-10-15T07:41:44.258706+00:00  analyze            conf=0.60 risk=med  decision=pending    reviewer=-              21453ms  The changes involve adding a new field to a database schema 
+2026-10-15T07:41:44.272452+00:00  route              conf=0.60 risk=med  decision=pending    reviewer=-                  0ms  route=human_approval (auto >= 0.73, escalate < 0.58)
+2026-10-15T07:41:44.290261+00:00  human_approval     conf=0.60 risk=med  decision=pending    reviewer=-                  0ms  approval requested from a human reviewer
+2026-10-15T07:41:44.336378+00:00  human_approval     conf=0.60 risk=med  decision=pending    reviewer=-                  0ms  approval requested from a human reviewer
+2026-10-15T07:41:44.342431+00:00  human_approval     conf=0.60 risk=med  decision=approve    reviewer=nhanna4605        14ms  reviewer chose approve
+2026-10-15T07:41:46.236085+00:00  commit             conf=0.60 risk=med  decision=approve    reviewer=nhanna4605      1891ms  final_action=committed

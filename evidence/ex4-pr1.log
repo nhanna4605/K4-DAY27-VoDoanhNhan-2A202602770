@@ -1,0 +1,24 @@
+─────────────────────────────────────────────────────────────── Exercise 4 — SQLite audit trail ───────────────────────────────────────────────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/1
+thread_id = 602b5a30-3f22-4a57-b754-a2383c02064e
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 2 comment(s), 3 question(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+┌───────────────────────────────────────────────────────────────────────── conf=60% ──────────────────────────────────────────────────────────────────────────┐
+│ This pull request adds a priority field to tasks in the task tracking application. It modifies the command-line interface to accept a priority argument     │
+│ when adding a task, updates the Task model to include a priority attribute, and alters the storage layer to accommodate the new field in the database       │
+│ schema and task management logic.                                                                                                                           │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+approve/reject/edit? approve
+Feedback: 
+Deserializing unregistered type common.schemas.PRAnalysis from checkpoint. This will be blocked in a future version. Set LANGGRAPH_STRICT_MSGPACK=true to block now, or add to allowed_msgpack_modules to allow explicitly: [('common.schemas', 'PRAnalysis')]
+→ commit
+  ✓ posted comment to https://github.com/VinUni-AI20k/PR-Demo/pull/1
+──────────────────────────────────────────────────────────────────────────── Final ────────────────────────────────────────────────────────────────────────────
+final_action = committed
+
+Replay: uv run python -m audit.replay --thread 602b5a30-3f22-4a57-b754-a2383c02064e

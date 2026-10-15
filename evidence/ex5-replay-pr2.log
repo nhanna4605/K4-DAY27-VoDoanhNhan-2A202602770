@@ -1,0 +1,9 @@
+───────────────────────────────────────────────────────────────────────────── Replay 245c95fc-bd1f-4bb3-ab48-f018cc6c9b06 ─────────────────────────────────────────────────────────────────────────────
+2026-10-15T07:47:48.944927+00:00  fetch_pr           conf=0.00 risk=med  decision=pending    reviewer=-               2686ms  Fetched 4 files, head=501f95e
+2026-10-15T07:48:00.772088+00:00  analyze            conf=0.60 risk=high decision=pending    reviewer=-              11750ms  The review identifies several critical issues, particularly 
+2026-10-15T07:48:00.808989+00:00  route              conf=0.60 risk=high decision=escalate   reviewer=-                 14ms  route=escalate (auto >= 0.73, escalate < 0.70)
+2026-10-15T07:48:00.821268+00:00  escalate           conf=0.60 risk=high decision=escalate   reviewer=-                  0ms  asked the reviewer 3 question(s)
+2026-10-15T07:48:28.908932+00:00  escalate           conf=0.60 risk=high decision=escalate   reviewer=-                  0ms  asked the reviewer 3 question(s)
+2026-10-15T07:48:28.955861+00:00  escalate           conf=0.60 risk=high decision=escalate   reviewer=nhanna4605        46ms  reviewer answered 3 question(s)
+2026-10-15T07:48:42.770009+00:00  synthesize         conf=0.70 risk=med  decision=escalate   reviewer=nhanna4605     13780ms  The author has acknowledged the need to replace MD5 with a m
+2026-10-15T07:48:44.983312+00:00  commit             conf=0.70 risk=med  decision=escalate   reviewer=nhanna4605      2172ms  final_action=committed

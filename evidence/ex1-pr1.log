@@ -1,0 +1,13 @@
+─────────────────────── Exercise 1 — confidence routing ───────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/1
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 2 comment(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+✓ HUMAN APPROVAL — placeholder, exercise 2 will pause here
+──────────────────────────────────── Final ────────────────────────────────────
+confidence = 60%
+action     = pending_human_approval

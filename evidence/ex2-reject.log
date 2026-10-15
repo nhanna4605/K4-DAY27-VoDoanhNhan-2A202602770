@@ -1,0 +1,108 @@
+───────────────────── Exercise 2 — HITL with interrupt() ──────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/1
+
+thread_id = ae8ec18e-881e-4d3a-bf4a-016ac0138d95
+
+→ fetch_pr
+  ✓ 3 files, head 1646156
+→ analyze
+  ✓ confidence=60%, 2 comment(s)
+→ route
+  ✓ decision=human_approval (confidence=60%)
+┌───────────────────────────── Approval request ──────────────────────────────┐
+│ Confidence: 60%                                                             │
+│ The changes introduce a new field in the database schema and modify how     │
+│ tasks are added and listed, which could affect data integrity and           │
+│ correctness. There are no tests included for the new functionality, and the │
+│ lack of validation for the priority input raises concerns about potential   │
+│ invalid data being stored. Therefore, while the changes are clear, the risk │
+│ factors warrant a lower confidence level.                                   │
+│                                                                             │
+│ Summary: This pull request adds a priority field to tasks in the task       │
+│ tracking application, allowing users to specify the priority level (normal, │
+│ high, urgent) when adding tasks. The changes include updates to the         │
+│ command-line interface for task addition, modifications to the Task model   │
+│ to include priority, and adjustments to the storage layer to accommodate    │
+│ the new field in the database schema.                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+   tasktrack/cli.py:7 — Consider adding validation for the priority argument to
+ensure it only accepts values 0, 1, or 2. This will prevent invalid data from 
+being stored in the database.
+   tasktrack/storage.py:10 — It would be beneficial to add unit tests for the 
+new priority feature, especially for the add and list functionalities, to 
+ensure that tasks are being created and retrieved correctly with their priority
+levels.
+
+--- diff preview ---
+diff --git a/tasktrack/cli.py b/tasktrack/cli.py
+index 8649551..af7db5e 100644
+--- a/tasktrack/cli.py
++++ b/tasktrack/cli.py
+@@ -3,12 +3,16 @@
+ from .storage import Storage
+ 
+ 
++PRIORITY_LABEL = {0: " ", 1: "!", 2: "!!"}
++
++
+ def main() -> None:
+     parser = argparse.ArgumentParser(prog="tasktrack")
+     sub = parser.add_subparsers(dest="cmd", required=True)
+ 
+     p_add = sub.add_parser("add", help="Add a task")
+     p_add.add_argument("title")
++    p_add.add_argument("--priority", type=int, default=0, help="0=normal, 
+1=high, 2=urgent")
+ 
+     sub.add_parser("list", help="List all tasks")
+ 
+@@ -19,12 +23,13 @@ def main() -> None:
+     store = Storage()
+ 
+     if args.cmd == "add":
+-        t = store.add(args.title)
++        t = store.add(args.title, priority=args.priority)
+         print(f"[{t.id}] {t.title}")
+     elif args.cmd == "list":
+         for t in store.list():
+             mark = "x" if t.done else " "
+-            print(f"[{mark}] {t.id:>3}  {t.title}")
++            pr = PRIORITY_LABEL.get(t.priority, "?")
++            print(f"[{mark}] {pr:>2} {t.id:>3}  {t.title}")
+     elif args.cmd == "done":
+         store.mark_done(args.task_id)
+         print(f"Marked task {args.task_id} done")
+diff --git a/tasktrack/models.py b/tasktrack/models.py
+index 9fb4701..cce0f4e 100644
+--- a/tasktrack/models.py
++++ b/tasktrack/models.py
+@@ -6,3 +6,4 @@ class Task:
+     id: int | None
+     title: str
+     done: bool = False
++    priority: int = 0   # 0 = normal, 1 = high, 2 = urgent
+diff --git a/tasktrack/storage.py b/tasktrack/storage.py
+index a1f4f6c..e615a08 100644
+--- a/tasktrack/storage.py
++++ b/tasktrack/storage.py
+@@ -9,9 +9,10 @@
+ 
+ SCHEMA = """
+ CREATE TABLE IF NOT EXISTS tasks (
+-    id    INTEGER PRIMARY KEY AUTOINCREMENT,
+-    title TEXT    NOT NULL,
+-    done  INTEGER NOT NULL DEFAULT 0
++    id       INTEGER PRIMARY KEY AUTOINCREMENT,
++    title    TEXT    NOT NULL,
++    done     INTEGER NOT NULL DEFAULT 0,
++    priority INTEGER NOT NULL DEFAULT 0
+ )
+ """
+ 
+@
+
+Choice (approve/reject/edit)? Feedback: Deserializing unregistered type common.schemas.PRAnalysis from checkpoint. This will be blocked in a future version. Set LANGGRAPH_STRICT_MSGPACK=true to block now, or add to allowed_msgpack_modules to allow explicitly: [('common.schemas', 'PRAnalysis')]
+→ commit
+  · skipping comment (choice=reject)
+──────────────────────────────────── Done ─────────────────────────────────────
+rejected

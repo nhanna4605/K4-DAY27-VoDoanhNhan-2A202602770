@@ -1,0 +1,31 @@
+────────────────────────────────────────────────────────── Exercise 3 — escalation with reviewer Q&A ──────────────────────────────────────────────────────────
+PR: https://github.com/VinUni-AI20k/PR-Demo/pull/2
+
+thread_id = 20cd5bf7-0790-42a5-a793-1f6de738b821
+
+→ fetch_pr
+  ✓ 4 files, head 501f95e
+→ analyze
+  ✓ confidence=50%, 4 question(s)
+→ route
+  ✓ decision=escalate (confidence=50%)
+┌──────────────────────────────────────────────────────────────────── Escalation conf=50% ────────────────────────────────────────────────────────────────────┐
+│ This PR adds user login functionality and cloud synchronization features, including password hashing, token issuance, and task synchronization with a       │
+│ remote server.                                                                                                                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Q: Why did you choose MD5 for password hashing in `hash_password`?
+A: Không có lý do kỹ thuật cho MD5, đây là lựa chọn tạm trong bản demo. MD5 không an toàn để lưu mật khẩu; trước khi merge phải đổi sang bcrypt hoặc argon2 có salt.
+Q: What is the reasoning behind using SHA-1 for token issuance in `issue_token`?
+A: Token đang được lưu dạng plaintext chỉ vì chưa tích hợp keyring. Không chấp nhận ở production: cần lưu qua OS keyring hoặc mã hoá, và không ghi token vào log.
+Q: Why is the `SYNC_URL` using HTTP instead of HTTPS in `sync.py`?
+A: SYNC_URL bắt buộc là HTTPS ở production; bản demo chỉ chạy với server local. Cần đọc URL từ cấu hình.
+Q: How do you plan to handle user identification in the `add` method of `storage.py` when multiple users are implemented?
+A: Mục đích của PR là thêm đăng nhập và đồng bộ cloud cho bản demo. Các điểm bảo mật (hash mật khẩu, lưu token, truy vấn SQL) đều phải sửa trước khi merge.
+Deserializing unregistered type common.schemas.PRAnalysis from checkpoint. This will be blocked in a future version. Set LANGGRAPH_STRICT_MSGPACK=true to block now, or add to allowed_msgpack_modules to allow explicitly: [('common.schemas', 'PRAnalysis')]
+→ synthesize
+  ✓ refined confidence=60%, 4 comment(s)
+→ commit
+  ✓ posted comment to https://github.com/VinUni-AI20k/PR-Demo/pull/2
+──────────────────────────────────────────────────────────────────────────── Final ────────────────────────────────────────────────────────────────────────────
+final_action = committed_after_escalation
+final confidence = 60%
